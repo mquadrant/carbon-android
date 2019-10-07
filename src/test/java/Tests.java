@@ -305,6 +305,52 @@ public class Tests extends BaseClass {
         }
     }
 
+    @Test(priority = 6)
+    public void walletTransactionFilterTest(){
+        // creates a toggle for the given test, adds all log events under it
+        ExtentTest testFundTransaction = extent.createTest("Wallet Transaction Filter", "Test Scenario when the user wants to check the previous transaction");
+
+        // log(Status, details)
+        testFundTransaction.log(Status.INFO, "Wallet Transaction Filter Test Started");
+        try{
+
+        driver.findElementByXPath("//android.widget.TextView[@text='Transactions']").click();
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/transactionTypeSpinner").click();
+        List dropList = driver.findElements(By.id("android:id/text1"));
+        for(int i = 0; i<dropList.size();i++){
+            AndroidElement listItem = (AndroidElement)dropList.get(i);
+            if(listItem.getText().contains("Wallet")){
+                listItem.click();
+                break;
+            }
+        }
+        testFundTransaction.log(Status.PASS, "Select Fund from dropdown list");
+
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/title_menu_item_others").click();
+        testFundTransaction.log(Status.PASS, "Open Filter");
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/createdAtEditText").click();
+        driver.findElementByXPath("//android.widget.Button[@text='OK']").click();
+
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/endAtEditText").click();
+        driver.findElementByXPath("//android.widget.Button[@text='OK']").click();
+        testFundTransaction.log(Status.PASS, "Select today's date");
+
+
+            List list = driver.findElements(By.id("com.lenddo.mobile.paylater.staging:id/description"));
+                AndroidElement listItem = (AndroidElement)list.get(0);
+                if(listItem.getText().contains("Topup for Wallet ID")){
+                    listItem.click();
+                    testFundTransaction.log(Status.PASS, "Last fund transaction was found");
+                }else{
+                    testFundTransaction.log(Status.FAIL, "Last fund transaction was not found");
+                }
+
+        }catch(Exception ex){
+            testFundTransaction.log(Status.FAIL, "Test failed");
+        }
+
+    }
+
 
 
 }
