@@ -1,5 +1,7 @@
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.AndroidElement;
 import io.appium.java_client.remote.MobileCapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.AfterSuite;
@@ -9,9 +11,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
-public class BaseClass {
+public class BaseClass extends ExtentsReportDoc {
 
-    private AppiumDriver<MobileElement> driver;
+    AndroidDriver<AndroidElement> driver;
 
     @BeforeTest
     public void setUp(){
@@ -28,11 +30,14 @@ public class BaseClass {
             caps.setCapability("appActivity", "com.lenddo.mobile.paylater.home.activity.HomeActivity");
             caps.setCapability("noReset", true);
 
+            caps.setCapability("unicodeKeyboard", "true");
+            caps.setCapability("resetKeyboard", "true");
+
 
             URL url = new URL("http://127.0.0.1:4723/wd/hub");
 
             //Instantiate Appium Driver
-            driver = new AppiumDriver<>(url,caps);
+            driver = new AndroidDriver<>(url,caps);
             driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
             System.out.println("Application Started....");
 
@@ -52,6 +57,6 @@ public class BaseClass {
 
     @AfterSuite
     public void tearDown() {
-        driver.quit();
+//        driver.quit();
     }
 }
