@@ -9,5 +9,8 @@
         <module name="CarbonAppTest" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="carbonapp" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>
