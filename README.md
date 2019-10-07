@@ -70,3 +70,8 @@ Note: To run mvn CLI, download maven from https://maven.apache.org/download.cgi 
 
 Prerequisites:
 Java JDK, Appium, Android SDK, intelliJ.
+
+#### Test Report
+Extent Report Framework has been used to generate beautiful, interactive and detailed reports for our tests.
+
+You can view the output report by running this command `open report.html`
