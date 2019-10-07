@@ -55,17 +55,18 @@ make bill payments for services.
 
 ### Automated Environment Setup
 Maven is used as a project management tool for projects build, dependency and documentation.
-> To download libraries; clean and rebuild project.
 
->Mobile capabilities variables can be found in test/java/DeviceSpec path and values can be 
+ To download libraries; clean and rebuild project.
+
+Mobile capabilities variables can be found in 'src/test/java/DeviceSpec' path and values can be 
 edited to work for other android phone.
->
->You can get the device uuid by running in the command: 
->`adb devices`
->
->You can compile and run test from command line: `mvn clean test`
->
->Note: To run mvn CLI, download maven from https://maven.apache.org/download.cgi and add binary path to PATH.
->
->Prerequisites:
->Java JDK, Appium, Android SDK, intelliJ.
+
+You can get the device uuid by running in the command: 
+`adb devices`
+
+You can compile and run test from command line: `mvn clean test`
+
+Note: To run mvn CLI, download maven from https://maven.apache.org/download.cgi and add binary path to PATH.
+
+Prerequisites:
+Java JDK, Appium, Android SDK, intelliJ.
