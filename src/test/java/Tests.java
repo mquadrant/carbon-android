@@ -1,32 +1,38 @@
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
+import helpers.CurrencyConverter;
 import helpers.RandomString;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.nativekey.AndroidKey;
 import io.appium.java_client.android.nativekey.KeyEvent;
 import org.apache.http.util.Asserts;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 
 import static org.testng.FileAssert.fail;
 
 public class Tests extends BaseClass {
 
-    private String loginPhoneNumber = "08990001099";
+    private String loginPhoneNumber = "08990001101,";
     private String loginPin = "1234";
     private String wrongPhoneNumber = "080"+new RandomString(9).getString(8);
     private String wrongPin = new RandomString(9).getString(4);
-    private String verificationCode = "123456";
 
-    @Test
+    @Test(priority = 1)
     public void sampleTest(){
         System.out.println("I am inside sample test");
     }
 
-    @Test
+    @Test(priority = 2)
     public void navigateToSignInTest(){
         // creates a toggle for the given test, adds all log events under it
         ExtentTest navigateSignIn = extent.createTest("Welcome Page", "Test Scenario for Navigation to Sign In");
@@ -38,13 +44,13 @@ public class Tests extends BaseClass {
         try{
             Assert.assertEquals(driver.findElementById("com.lenddo.mobile.paylater.staging:id/sign_in_next").getText(),"Sign in");
             navigateSignIn.log(Status.PASS, "Navigate to Login View");
-        }catch(AssertionError ex){
+        }catch(Exception ex){
             navigateSignIn.log(Status.FAIL, "Cant Sign in on this view");
         }
 
     }
 
-    @Test
+    @Test(priority = 3)
     public void signInTest(){
         // creates a toggle for the given test, adds all log events under it
         ExtentTest testSignIn = extent.createTest("SignIn", "Test Scenario when the user login");
@@ -56,7 +62,7 @@ public class Tests extends BaseClass {
         try{
             Assert.assertEquals(driver.findElementById("com.lenddo.mobile.paylater.staging:id/textinput_error").getText(),"Input your phone number");
             testSignIn.log(Status.PASS, "form validate is implemented");
-        }catch(AssertionError ex){
+        }catch(Exception ex){
             testSignIn.log(Status.FAIL, "form validate is not implemented");
         }
 
@@ -72,7 +78,7 @@ public class Tests extends BaseClass {
         try{
             Assert.assertEquals(driver.findElementById("com.lenddo.mobile.paylater.staging:id/alertTitle").getText(),"Error");
             testSignIn.log(Status.PASS, "Should not Login with incorrect credential");
-        }catch(AssertionError ex){
+        }catch(Exception ex){
             testSignIn.log(Status.FAIL, "Login with incorrect credential");
         }
         driver.findElement(By.id("android:id/button1")).click();
@@ -86,6 +92,139 @@ public class Tests extends BaseClass {
         }
         driver.findElement(By.id("com.lenddo.mobile.paylater.staging:id/sign_in_next")).click();
         testSignIn.log(Status.PASS, "Login to verification view");
+
+        try{
+            Assert.assertTrue(driver.findElementByXPath("//android.widget.TextView[@text='Verify your phone number']").isDisplayed());
+            //explicit wait for input field
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("android.widget.FrameLayout")));
+            driver.findElements(By.className("android.widget.FrameLayout")).get(9).click();
+
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_1));
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_2));
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_3));
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_4));
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_5));
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_6));
+
+            testSignIn.log(Status.PASS, "Verification successful");
+        }catch(Exception ex){
+            testSignIn.log(Status.PASS, "Already been verified");
+            System.out.println("Already verified");
+        }
     }
+
+    @Test(priority = 4)
+    public void airtimeRechargeTest(){
+
+        // creates a toggle for the given test, adds all log events under it
+        ExtentTest testAirtimeRecharge = extent.createTest("Airtime Recharge", "Test Scenario when the user is about to recharge airtime");
+
+        // log(Status, details)
+        testAirtimeRecharge.log(Status.INFO, "Airtime Recharge Test Started");
+
+        try{
+            Assert.assertTrue(driver.findElementById("com.lenddo.mobile.paylater.staging:id/tvRightNow").isDisplayed());
+            driver.findElementById("com.lenddo.mobile.paylater.staging:id/tvRightNow").click();
+            testAirtimeRecharge.log(Status.PASS, "Clear Call to action");
+        }catch(Exception ex){
+            testAirtimeRecharge.log(Status.PASS, "CTA didnt popup");
+        }
+
+        String availableBalance  = driver.findElementById("com.lenddo.mobile.paylater.staging:id/walletBalanceView").getText();
+        BigDecimal balance1 = new BigDecimal("0");
+        try {
+            balance1 = new CurrencyConverter("NGN").parseConvert(availableBalance);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        try{
+        driver.findElementByXPath("//android.widget.TextView[@text='Buy Airtime']").click();
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/edit_text_phone_number").click();
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/edit_text_phone_number").sendKeys("08031112000");
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/edit_text_airtime_price").click();
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/edit_text_airtime_price").sendKeys("100");
+        testAirtimeRecharge.log(Status.PASS, "User should enter amount");
+
+        driver.findElementByAndroidUIAutomator("new UiScrollable("
+                        + "new UiSelector().scrollable(true)).scrollIntoView("
+                        + "new UiSelector().textContains(\"Save this payment\"));");
+        testAirtimeRecharge.log(Status.PASS, "User should be able to scroll down");
+        driver.findElementByAndroidUIAutomator("new UiSelector().resourceId(\"com.lenddo.mobile.paylater.staging:id/card_mobile_network\").instance(3)").click();
+        testAirtimeRecharge.log(Status.WARNING, "User should'nt be able to select network");
+
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/switch_toggle").click();
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/edit_text_payment_name").click();
+            driver.findElementById("com.lenddo.mobile.paylater.staging:id/edit_text_payment_name").clear();
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/edit_text_payment_name").sendKeys("Airtime test"+new RandomString(9).getString(4));
+        testAirtimeRecharge.log(Status.PASS, "User should be able to save payment");
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/button_next").click();
+
+        driver.findElementByXPath("//android.widget.TextView[@text='Available balance']").click();
+        testAirtimeRecharge.log(Status.PASS, "User should be able to select wallet");
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/button_confirm_payment").click();
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/text_view_edit_button").click();
+
+        driver.findElementByAndroidUIAutomator("new UiScrollable("
+                    + "new UiSelector().scrollable(true)).scrollIntoView("
+                    + "new UiSelector().textContains(\"How much airtime do you want to buy?\"));");
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/edit_text_airtime_price").clear();
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/edit_text_airtime_price").sendKeys("200");
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/button_next").click();
+
+        driver.findElementByXPath("//android.widget.TextView[@text='Available balance']").click();
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/button_confirm_payment").click();
+
+        try{
+            Assert.assertEquals(driver.findElementById("com.lenddo.mobile.paylater.staging:id/amount_view_amount").getText(),"200.00");
+            testAirtimeRecharge.log(Status.PASS, "User should be able to edit airtime price");
+        }catch(Exception ex){
+            testAirtimeRecharge.log(Status.FAIL, "User could not edit airtime price");
+        }
+        driver.findElementById("com.lenddo.mobile.paylater.staging:id/button_pay").click();
+        //explicit wait for input field
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("android.widget.FrameLayout")));
+        driver.findElements(By.className("android.widget.FrameLayout")).get(8).click();
+
+        driver.pressKey(new KeyEvent(AndroidKey.DIGIT_1));
+        driver.pressKey(new KeyEvent(AndroidKey.DIGIT_2));
+        driver.pressKey(new KeyEvent(AndroidKey.DIGIT_3));
+        driver.pressKey(new KeyEvent(AndroidKey.DIGIT_4));
+        testAirtimeRecharge.log(Status.PASS, "User entered pin to verify payment");
+            try{
+                Assert.assertTrue(driver.findElementByXPath("//android.widget.TextView[@text='Saved Plan Already Exists']").isDisplayed());
+                driver.findElement(By.id("com.lenddo.mobile.paylater.staging:id/no_button")).click();
+                testAirtimeRecharge.log(Status.PASS, "Plan not replaced if exist");
+            }catch(Exception ex){
+                testAirtimeRecharge.log(Status.PASS, "New saved plan");
+            }
+
+            try{
+                Assert.assertTrue(driver.findElementByXPath("//android.widget.TextView[@text='Your airtime purchase was successful!']").isDisplayed());
+                testAirtimeRecharge.log(Status.PASS, "Airtime has been purchased successfully");
+                driver.findElementByAndroidUIAutomator("new UiScrollable("
+                        + "new UiSelector().scrollable(true)).scrollIntoView("
+                        + "new UiSelector().textContains(\"Go back home\"));");
+                driver.findElement(By.id("com.lenddo.mobile.paylater.staging:id/success_home_button")).click();
+                String availableBalance2  = driver.findElementById("com.lenddo.mobile.paylater.staging:id/walletBalanceView").getText();
+                BigDecimal balance2 = new CurrencyConverter("NGN").parseConvert(availableBalance2);
+                String amt = ""+balance1.subtract(balance2);
+                if(amt.equals("200.00")){
+                    testAirtimeRecharge.log(Status.PASS, "Wallet has been debited");
+                }else{
+                    testAirtimeRecharge.log(Status.FAIL, "Wallet was not debited");
+                }
+            }catch(Exception ex){
+                testAirtimeRecharge.log(Status.FAIL, "Airtime purchase failed");
+            }
+
+        }catch (Exception ex){
+            testAirtimeRecharge.log(Status.FAIL, "Test Failed");
+        }
+    }
+
+
 
 }
