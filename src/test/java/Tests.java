@@ -2,7 +2,9 @@ import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
 import helpers.CurrencyConverter;
 import helpers.RandomString;
+import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.AndroidElement;
 import io.appium.java_client.android.nativekey.AndroidKey;
 import io.appium.java_client.android.nativekey.KeyEvent;
 import org.apache.http.util.Asserts;
@@ -16,6 +18,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Locale;
 
 import static org.testng.FileAssert.fail;
@@ -29,7 +32,7 @@ public class Tests extends BaseClass {
 
     @Test(priority = 1)
     public void sampleTest(){
-        System.out.println("I am inside sample test");
+        System.out.println("This is a sample test");
     }
 
     @Test(priority = 2)
@@ -222,6 +225,83 @@ public class Tests extends BaseClass {
 
         }catch (Exception ex){
             testAirtimeRecharge.log(Status.FAIL, "Test Failed");
+        }
+    }
+
+    @Test(priority = 5)
+    public void fundWalletTest(){
+        // creates a toggle for the given test, adds all log events under it
+        ExtentTest testFundWallet = extent.createTest("Fund Wallet", "Test Scenario when the user is about to fund the wallet");
+
+        // log(Status, details)
+        testFundWallet.log(Status.INFO, "Fund Wallet Test Started");
+
+        String availableBalance  = driver.findElementById("com.lenddo.mobile.paylater.staging:id/walletBalanceView").getText();
+        BigDecimal balance1 = new BigDecimal("0");
+        try {
+            balance1 = new CurrencyConverter("NGN").parseConvert(availableBalance);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+//How would you like to fund your wallet?
+        try {
+            driver.findElementByXPath("//android.widget.TextView[@text='Fund Wallet']").click();
+            driver.findElementByXPath("//android.widget.TextView[@text='Fund with debit/ATM card']").click();
+            testFundWallet.log(Status.PASS, "Click on Card Option");
+
+            driver.findElementById("com.lenddo.mobile.paylater.staging:id/walletAmountToFund").click();
+            driver.findElementById("com.lenddo.mobile.paylater.staging:id/walletAmountToFund").sendKeys("1000");
+            driver.findElementById("com.lenddo.mobile.paylater.staging:id/proceedWalletFunding").click();
+            testFundWallet.log(Status.PASS, "Click on proceed button");
+
+            List<AndroidElement> elements = driver.findElements(By.id("com.lenddo.mobile.paylater.staging:id/card_number"));
+            for (AndroidElement element : elements) {
+                String word = element.getText();
+                if (word.contains("****")) {
+                    element.click();
+                    break;
+                }
+            }
+            testFundWallet.log(Status.PASS, "Select a Card");
+            driver.findElementById("com.lenddo.mobile.paylater.staging:id/button_confirm_payment").click();
+            driver.findElementById("com.lenddo.mobile.paylater.staging:id/secure_pay_button").click();
+            testFundWallet.log(Status.PASS, "Click on securely pay button");
+
+            //explicit wait for input field
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("android.widget.FrameLayout")));
+            driver.findElements(By.className("android.widget.FrameLayout")).get(8).click();
+
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_1));
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_2));
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_3));
+            driver.pressKey(new KeyEvent(AndroidKey.DIGIT_4));
+            testFundWallet.log(Status.PASS, "User entered pin to verify funding");
+
+            try {
+                Assert.assertTrue(driver.findElementByXPath("//android.widget.TextView[@text='Your wallet top-up was successful']").isDisplayed());
+                testFundWallet.log(Status.PASS, "Successful funding message shown");
+            }catch(Exception ex){
+                testFundWallet.log(Status.FAIL, "Successful funding message not shown");
+            }
+            driver.findElementById("com.lenddo.mobile.paylater.staging:id/success_home_button").click();
+            String availableBalance2  = driver.findElementById("com.lenddo.mobile.paylater.staging:id/walletBalanceView").getText();
+            BigDecimal balance2 = new CurrencyConverter("NGN").parseConvert(availableBalance2);
+            String amt = ""+balance2.subtract(balance1);
+            if(amt.equals("1000.00")){
+                testFundWallet.log(Status.PASS, "Wallet has been funded");
+            }else{
+                testFundWallet.log(Status.FAIL, "Wallet was not funded");
+            }
+            try{
+                Assert.assertTrue(driver.findElementByXPath("//android.widget.TextView[@text='Transaction Alert']").isDisplayed());
+                driver.findElementById("ccom.lenddo.mobile.paylater.staging:id/okayButton").click();
+                testFundWallet.log(Status.PASS, "Clear Transaction alert");
+            }catch(Exception ex){
+                testFundWallet.log(Status.PASS, "Transaction alert didnt popup");
+            }
+        }catch(Exception ex){
+            testFundWallet.log(Status.FAIL, "Test Failed");
         }
     }
 
