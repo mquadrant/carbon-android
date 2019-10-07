@@ -57,6 +57,6 @@ public class BaseClass extends ExtentsReportDoc {
 
     @AfterSuite
     public void tearDown() {
-//        driver.quit();
+        driver.quit();
     }
 }

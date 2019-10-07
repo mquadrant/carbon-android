@@ -19,7 +19,6 @@ public class RandomString {
 
     private int randomNumber(int range){
         Random rand = new Random();
-        // Obtain a number between [0 - 49].
         return rand.nextInt(range);
     }
 
