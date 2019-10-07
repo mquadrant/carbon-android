@@ -20,14 +20,14 @@ public class BaseClass extends ExtentsReportDoc {
         try{
             DesiredCapabilities caps = new DesiredCapabilities();
 
-            caps.setCapability(MobileCapabilityType.DEVICE_NAME, "Nexus_5_API_24");
-            caps.setCapability(MobileCapabilityType.UDID, "emulator-5554");
-            caps.setCapability(MobileCapabilityType.PLATFORM_NAME, "ANDROID");
-            caps.setCapability(MobileCapabilityType.PLATFORM_VERSION, "6.0");
+            caps.setCapability(MobileCapabilityType.DEVICE_NAME, DeviceSpec.DEVICE_NAME);
+            caps.setCapability(MobileCapabilityType.UDID, DeviceSpec.UDID);
+            caps.setCapability(MobileCapabilityType.PLATFORM_NAME, DeviceSpec.PLATFORM_NAME);
+            caps.setCapability(MobileCapabilityType.PLATFORM_VERSION, DeviceSpec.PLATFORM_VERSION);
             caps.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 60);
 
-            caps.setCapability("appPackage", "com.lenddo.mobile.paylater.staging");
-            caps.setCapability("appActivity", "com.lenddo.mobile.paylater.home.activity.HomeActivity");
+            caps.setCapability("appPackage", DeviceSpec.APP_PACKAGE);
+            caps.setCapability("appActivity", DeviceSpec.APP_ENTRY_POINT);
             caps.setCapability("noReset", true);
 
             caps.setCapability("unicodeKeyboard", "true");
