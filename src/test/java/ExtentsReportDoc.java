@@ -10,7 +10,7 @@ public class ExtentsReportDoc {
     @BeforeSuite
     public static void reportSetup() {
         // start reporters
-        htmlReporter = new ExtentHtmlReporter("extent.html");
+        htmlReporter = new ExtentHtmlReporter("report.html");
 
         // create ExtentReports and attach reporter(s)
         extent = new ExtentReports();
