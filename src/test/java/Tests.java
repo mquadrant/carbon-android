@@ -211,6 +211,15 @@ public class Tests extends BaseClass {
                         + "new UiSelector().scrollable(true)).scrollIntoView("
                         + "new UiSelector().textContains(\"Go back home\"));");
                 driver.findElement(By.id("com.lenddo.mobile.paylater.staging:id/success_home_button")).click();
+
+                try{
+                    Assert.assertTrue(driver.findElementByXPath("//android.widget.TextView[@text='Transaction Alert']").isDisplayed());
+                    driver.findElementById("com.lenddo.mobile.paylater.staging:id/okayButton").click();
+                    testAirtimeRecharge.log(Status.PASS, "Clear Transaction alert");
+                }catch(Exception ex){
+                    testAirtimeRecharge.log(Status.PASS, "Transaction alert didnt popup");
+                }
+
                 String availableBalance2  = driver.findElementById("com.lenddo.mobile.paylater.staging:id/walletBalanceView").getText();
                 BigDecimal balance2 = new CurrencyConverter("NGN").parseConvert(availableBalance2);
                 String amt = ""+balance1.subtract(balance2);
@@ -285,6 +294,16 @@ public class Tests extends BaseClass {
                 testFundWallet.log(Status.FAIL, "Successful funding message not shown");
             }
             driver.findElementById("com.lenddo.mobile.paylater.staging:id/success_home_button").click();
+            try{
+                if(driver.findElementById("com.lenddo.mobile.paylater.staging:id/titleTextView").getText().contains("Transaction Notification")||
+                        driver.findElementById("com.lenddo.mobile.paylater.staging:id/titleTextView").getText().contains("Transaction Alert")){
+                    driver.findElementById("com.lenddo.mobile.paylater.staging:id/okayButton").click();
+                    testFundWallet.log(Status.PASS, "Clear Transaction alert");
+                }
+            }catch(Exception ex){
+                testFundWallet.log(Status.PASS, "Transaction alert didnt popup");
+            }
+
             String availableBalance2  = driver.findElementById("com.lenddo.mobile.paylater.staging:id/walletBalanceView").getText();
             BigDecimal balance2 = new CurrencyConverter("NGN").parseConvert(availableBalance2);
             String amt = ""+balance2.subtract(balance1);
@@ -293,13 +312,7 @@ public class Tests extends BaseClass {
             }else{
                 testFundWallet.log(Status.FAIL, "Wallet was not funded");
             }
-            try{
-                Assert.assertTrue(driver.findElementByXPath("//android.widget.TextView[@text='Transaction Alert']").isDisplayed());
-                driver.findElementById("ccom.lenddo.mobile.paylater.staging:id/okayButton").click();
-                testFundWallet.log(Status.PASS, "Clear Transaction alert");
-            }catch(Exception ex){
-                testFundWallet.log(Status.PASS, "Transaction alert didnt popup");
-            }
+
         }catch(Exception ex){
             testFundWallet.log(Status.FAIL, "Test Failed");
         }
@@ -313,8 +326,10 @@ public class Tests extends BaseClass {
         // log(Status, details)
         testFundTransaction.log(Status.INFO, "Wallet Transaction Filter Test Started");
         try{
-
-        driver.findElementByXPath("//android.widget.TextView[@text='Transactions']").click();
+            //explicit wait for input field
+            driver.findElementByXPath("//android.widget.TextView[@text='Transactions']").click();
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.id("com.lenddo.mobile.paylater.staging:id/description")));
         driver.findElementById("com.lenddo.mobile.paylater.staging:id/transactionTypeSpinner").click();
         List dropList = driver.findElements(By.id("android:id/text1"));
         for(int i = 0; i<dropList.size();i++){
